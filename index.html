@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사이트 접속 확인</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    @media screen and (min-width: 768px) {
+      .message {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loader"></div>
+  <div id="message" class="message">서버 상태를 확인 중입니다...</div>
+
+  <script>
+    window.onload = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectParam = urlParams.get('redirect');
+      const tgtParam = urlParams.get('tgt');
+      const fallbackUrl = 'https://tsv1m.jhss.xyz';
+      const messageElement = document.getElementById('message');
+      const proxyUrl = 'https://1ma.jhss.xyz';
+      const targetUrl = redirectParam ? redirectParam : '';
+
+      let timeout;
+
+      try {
+        timeout = setTimeout(() => {
+          messageElement.textContent = '서버 응답이 없습니다. 미러링 사이트로 이동합니다.';
+          setTimeout(() => {
+            window.location.href = fallbackUrl;
+          }, 2000);
+        }, 3000);
+
+        let requestUrl = proxyUrl;
+        if (tgtParam === 'rule') {
+          requestUrl = 'https://1ma.jhss.xyz/rule/10';
+        }
+
+        const response = await fetch(requestUrl, { method: 'GET' });
+
+        if (response.ok) {
+          clearTimeout(timeout);
+          messageElement.textContent = '페이지로 이동 중입니다.';
+          setTimeout(() => {
+            if (tgtParam === 'rule' && response.url) {
+              window.location.href = response.url;
+            } else if (targetUrl) {
+              window.location.href = `${proxyUrl}?redirect=${encodeURIComponent(targetUrl)}`;
+            } else {
+              window.location.href = proxyUrl;
+            }
+          }, 1000);
+        } else {
+          throw new Error('Invalid response');
+        }
+      } catch (error) {
+        clearTimeout(timeout);
+        messageElement.textContent = '서버 응답이 없습니다. 미러링 사이트로 이동합니다.';
+        setTimeout(() => {
+          window.location.href = fallbackUrl;
+        }, 2000);
+      }
+    };
+  </script>
+</body>
+</html>
