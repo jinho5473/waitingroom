@@ -55,6 +55,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const redirectParam = urlParams.get('redirect');
       const tgtParam = urlParams.get('tgt');
+      const svcParam = urlParams.get('svc');
       const fallbackUrl = 'https://tsv1m.jhss.xyz';
       const messageElement = document.getElementById('message');
       const proxyUrl = 'https://1ma.jhss.xyz';
@@ -71,7 +72,10 @@
         }, 2000);
 
         let requestUrl = proxyUrl;
-        if (tgtParam === 'rule') {
+
+        if (svcParam === 'rule') {
+          requestUrl = 'https://1ma.jhss.xyz/rule/1';
+        } else if (tgtParam === 'rule') {
           requestUrl = 'https://1ma.jhss.xyz/rule/1';
         }
 
@@ -81,7 +85,7 @@
           clearTimeout(timeout);
           messageElement.textContent = '페이지로 이동 중입니다.';
           setTimeout(() => {
-            if (tgtParam === 'rule' && response.url) {
+            if ((svcParam === 'rule' || tgtParam === 'rule') && response.url) {
               window.location.href = response.url;
             } else if (targetUrl) {
               window.location.href = `${proxyUrl}?redirect=${encodeURIComponent(targetUrl)}`;
